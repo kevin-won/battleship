@@ -1,0 +1,3 @@
+(library
+ (name person)
+ (libraries battleship))
