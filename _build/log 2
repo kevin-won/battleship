@@ -1,0 +1,143 @@
+# dune build
+# OCAMLPARAM: unset
+# Shared cache: disabled
+# Workspace root: /Users/kevinwon/Desktop/summer-2023/cs3110/battleship
+# Auto-detected concurrency: 10
+$ /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -config > /var/folders/ry/6h_39dn10ps57z9flhpyjl_00000gn/T/dune_fda3a8_output
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; for_host = None
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; toplevel_path =
+#      Some External "/Users/kevinwon/.opam/cs3110-2023sp/lib/toplevel"
+#  ; ocaml_bin = External "/Users/kevinwon/.opam/cs3110-2023sp/bin"
+#  ; ocaml = Ok External "/Users/kevinwon/.opam/cs3110-2023sp/bin/ocaml"
+#  ; ocamlc = External "/Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt"
+#  ; ocamlopt =
+#      Ok External "/Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlopt.opt"
+#  ; ocamldep =
+#      Ok External "/Users/kevinwon/.opam/cs3110-2023sp/bin/ocamldep.opt"
+#  ; ocamlmklib =
+#      Ok External "/Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlmklib.opt"
+#  ; env =
+#      map
+#        { "DUNE_OCAML_HARDCODED" : "/Users/kevinwon/.opam/cs3110-2023sp/lib"
+#        ; "DUNE_OCAML_STDLIB" :
+#            "/Users/kevinwon/.opam/cs3110-2023sp/lib/ocaml"
+#        ; "DUNE_SOURCEROOT" :
+#            "/Users/kevinwon/Desktop/summer-2023/cs3110/battleship"
+#        ; "INSIDE_DUNE" :
+#            "/Users/kevinwon/Desktop/summer-2023/cs3110/battleship/_build/default"
+#        ; "OCAMLFIND_IGNORE_DUPS_IN" :
+#            "/Users/kevinwon/Desktop/summer-2023/cs3110/battleship/_build/install/default/lib"
+#        ; "OCAMLPATH" :
+#            "/Users/kevinwon/Desktop/summer-2023/cs3110/battleship/_build/install/default/lib"
+#        ; "OCAMLTOP_INCLUDE_PATH" :
+#            "/Users/kevinwon/Desktop/summer-2023/cs3110/battleship/_build/install/default/lib/toplevel"
+#        ; "OCAML_COLOR" : "always"
+#        ; "OPAMCOLOR" : "always"
+#        }
+#  ; findlib_paths = [ External "/Users/kevinwon/.opam/cs3110-2023sp/lib" ]
+#  ; arch_sixtyfour = true
+#  ; natdynlink_supported = true
+#  ; supports_shared_libraries = true
+#  ; ocaml_config =
+#      { version = "4.14.0"
+#      ; standard_library_default =
+#          "/Users/kevinwon/.opam/cs3110-2023sp/lib/ocaml"
+#      ; standard_library = "/Users/kevinwon/.opam/cs3110-2023sp/lib/ocaml"
+#      ; standard_runtime = "the_standard_runtime_variable_was_deleted"
+#      ; ccomp_type = "cc"
+#      ; c_compiler = "cc"
+#      ; ocamlc_cflags =
+#          [ "-O2"; "-fno-strict-aliasing"; "-fwrapv"; "-pthread" ]
+#      ; ocamlc_cppflags = [ "-D_FILE_OFFSET_BITS=64" ]
+#      ; ocamlopt_cflags =
+#          [ "-O2"; "-fno-strict-aliasing"; "-fwrapv"; "-pthread" ]
+#      ; ocamlopt_cppflags = [ "-D_FILE_OFFSET_BITS=64" ]
+#      ; bytecomp_c_compiler =
+#          [ "cc"
+#          ; "-O2"
+#          ; "-fno-strict-aliasing"
+#          ; "-fwrapv"
+#          ; "-pthread"
+#          ; "-D_FILE_OFFSET_BITS=64"
+#          ]
+#      ; bytecomp_c_libraries = [ "-lm"; "-lpthread" ]
+#      ; native_c_compiler =
+#          [ "cc"
+#          ; "-O2"
+#          ; "-fno-strict-aliasing"
+#          ; "-fwrapv"
+#          ; "-pthread"
+#          ; "-D_FILE_OFFSET_BITS=64"
+#          ]
+#      ; native_c_libraries = [ "-lm" ]
+#      ; native_pack_linker = [ "ld"; "-r"; "-o" ]
+#      ; cc_profile = []
+#      ; architecture = "arm64"
+#      ; model = "default"
+#      ; int_size = 63
+#      ; word_size = 64
+#      ; system = "macosx"
+#      ; asm = [ "cc"; "-c"; "-Wno-trigraphs" ]
+#      ; asm_cfi_supported = true
+#      ; with_frame_pointers = false
+#      ; ext_exe = ""
+#      ; ext_obj = ".o"
+#      ; ext_asm = ".s"
+#      ; ext_lib = ".a"
+#      ; ext_dll = ".so"
+#      ; os_type = "Unix"
+#      ; default_executable_name = "a.out"
+#      ; systhread_supported = true
+#      ; host = "aarch64-apple-darwin21.4.0"
+#      ; target = "aarch64-apple-darwin21.4.0"
+#      ; profiling = false
+#      ; flambda = false
+#      ; spacetime = false
+#      ; safe_string = true
+#      ; exec_magic_number = "Caml1999X031"
+#      ; cmi_magic_number = "Caml1999I031"
+#      ; cmo_magic_number = "Caml1999O031"
+#      ; cma_magic_number = "Caml1999A031"
+#      ; cmx_magic_number = "Caml1999Y031"
+#      ; cmxa_magic_number = "Caml1999Z031"
+#      ; ast_impl_magic_number = "Caml1999M031"
+#      ; ast_intf_magic_number = "Caml1999N031"
+#      ; cmxs_magic_number = "Caml1999D031"
+#      ; cmt_magic_number = "Caml1999T031"
+#      ; natdynlink_supported = true
+#      ; supports_shared_libraries = true
+#      ; windows_unicode = false
+#      }
+#  }
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I lib/battleship/.battleship.objs/byte -no-alias-deps -opaque -o lib/battleship/.battleship.objs/byte/battleship.cmo -c -impl lib/battleship/battleship.ml)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I bin/.main.eobjs/byte -I /Users/kevinwon/.opam/cs3110-2023sp/lib/ANSITerminal -I lib/battleship/.battleship.objs/byte -no-alias-deps -opaque -o bin/.main.eobjs/byte/dune__exe__Main.cmi -c -intf bin/main.mli)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o lib/battleship/battleship.cma lib/battleship/.battleship.objs/byte/battleship.cmo)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I lib/person/.person.objs/byte -I lib/battleship/.battleship.objs/byte -no-alias-deps -opaque -o lib/person/.person.objs/byte/person.cmo -c -impl lib/person/person.ml)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I lib/command/.command.objs/byte -I lib/battleship/.battleship.objs/byte -no-alias-deps -opaque -o lib/command/.command.objs/byte/command.cmo -c -impl lib/command/command.ml)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I bin/.main.eobjs/byte -I bin/.main.eobjs/native -I /Users/kevinwon/.opam/cs3110-2023sp/lib/ANSITerminal -I lib/battleship/.battleship.objs/byte -I lib/battleship/.battleship.objs/native -intf-suffix .ml -no-alias-deps -opaque -o bin/.main.eobjs/native/dune__exe__Main.cmx -c -impl bin/main.ml)
+> File "bin/main.ml", line 54, characters 0-3:
+> 54 | let main () =
+>      ^^^
+> Error: Syntax error
+[2]
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o lib/person/person.cma lib/person/.person.objs/byte/person.cmo)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o lib/command/command.cma lib/command/.command.objs/byte/command.cmo)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I test/.test.eobjs/byte -I /Users/kevinwon/.opam/cs3110-2023sp/lib/ounit2 -I /Users/kevinwon/.opam/cs3110-2023sp/lib/ounit2/advanced -I /Users/kevinwon/.opam/cs3110-2023sp/lib/seq -I /Users/kevinwon/.opam/cs3110-2023sp/lib/stdlib-shims -I lib/battleship/.battleship.objs/byte -I lib/command/.command.objs/byte -no-alias-deps -opaque -o test/.test.eobjs/byte/dune__exe__Test.cmi -c -intf test/test.mli)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I lib/person/.person.objs/byte -I lib/person/.person.objs/native -I lib/battleship/.battleship.objs/byte -I lib/battleship/.battleship.objs/native -intf-suffix .ml -no-alias-deps -opaque -o lib/person/.person.objs/native/person.cmx -c -impl lib/person/person.ml)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I test/.test.eobjs/byte -I test/.test.eobjs/native -I /Users/kevinwon/.opam/cs3110-2023sp/lib/ounit2 -I /Users/kevinwon/.opam/cs3110-2023sp/lib/ounit2/advanced -I /Users/kevinwon/.opam/cs3110-2023sp/lib/seq -I /Users/kevinwon/.opam/cs3110-2023sp/lib/stdlib-shims -I lib/battleship/.battleship.objs/byte -I lib/battleship/.battleship.objs/native -I lib/command/.command.objs/byte -I lib/command/.command.objs/native -intf-suffix .ml -no-alias-deps -opaque -o test/.test.eobjs/native/dune__exe__Test.cmx -c -impl test/test.ml)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I lib/command/.command.objs/byte -I lib/command/.command.objs/native -I lib/battleship/.battleship.objs/byte -I lib/battleship/.battleship.objs/native -intf-suffix .ml -no-alias-deps -opaque -o lib/command/.command.objs/native/command.cmx -c -impl lib/command/command.ml)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I lib/battleship/.battleship.objs/byte -I lib/battleship/.battleship.objs/native -intf-suffix .ml -no-alias-deps -opaque -o lib/battleship/.battleship.objs/native/battleship.cmx -c -impl lib/battleship/battleship.ml)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o lib/battleship/battleship.cmxa lib/battleship/.battleship.objs/native/battleship.cmx)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o lib/command/command.cmxa lib/command/.command.objs/native/command.cmx)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o lib/person/person.cmxa lib/person/.person.objs/native/person.cmx)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -shared -linkall -I lib/person -o lib/person/person.cmxs lib/person/person.cmxa)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -shared -linkall -I lib/command -o lib/command/command.cmxs lib/command/command.cmxa)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -shared -linkall -I lib/battleship -o lib/battleship/battleship.cmxs lib/battleship/battleship.cmxa)
+$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -o test/test.exe lib/battleship/battleship.cmxa lib/command/command.cmxa /Users/kevinwon/.opam/cs3110-2023sp/lib/ocaml/unix.cmxa -I /Users/kevinwon/.opam/cs3110-2023sp/lib/ocaml /Users/kevinwon/.opam/cs3110-2023sp/lib/stdlib-shims/stdlib_shims.cmxa /Users/kevinwon/.opam/cs3110-2023sp/lib/ounit2/advanced/oUnitAdvanced.cmxa /Users/kevinwon/.opam/cs3110-2023sp/lib/ounit2/oUnit.cmxa test/.test.eobjs/native/dune__exe__Test.cmx)

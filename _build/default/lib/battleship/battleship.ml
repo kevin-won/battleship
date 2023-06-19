@@ -1,3 +1,4 @@
+(* ---------------------------------------Game-Types--------------------------------------------- *)
 type ship_type = 
 | Carrier 
 | Battleship
@@ -30,49 +31,18 @@ type attacked =
 
 type cell = {
   occupation: occupation; 
-  mutable attacked: attacked;
+  attacked: attacked;
 }
 
-type board = cell array array
+type board = cell list list
 
-let game_dimension = 10
+(* ---------------------------------------Game-Exceptions--------------------------------------------- *)
 
-let my_board : board = Array.init (game_dimension) (fun _ -> 
-  Array.init (game_dimension) (fun _ -> {occupation=Unoccupied; attacked=Not}))
-
-let opponent_board = Array.init (game_dimension) (fun _ -> 
-  Array.init (game_dimension) (fun _ -> {occupation=Unoccupied; attacked=Not}))
-
-exception ThisWillNeverHappen
 exception OutOfBounds
 exception ShipOverlaps
+exception ThisWillNeverHappen
 
-let ship_logo ship_type =
-  match ship_type with 
-  | Carrier -> " A "
-  | Battleship -> " B "
-  | Cruiser -> " C "
-  | Submarine -> " D "
-  | Destroyer -> " E "
-
-let helper_board row = 
-  Array.iter (fun elem -> 
-    match elem.occupation with 
-    | Unoccupied -> 
-      (match elem.attacked with 
-        | Hit -> raise ThisWillNeverHappen
-        | Miss -> print_string " O "
-        | Not -> print_string " * ")
-    | Occupied ship_type -> 
-      match elem.attacked with 
-        | Hit -> print_string " X "
-        | Miss -> raise ThisWillNeverHappen
-        | Not -> print_string (ship_logo ship_type)
-    ) row;
-  print_newline ()
-
-let print_board board = 
-  Array.iter helper_board board
+(* ---------------------------------------Utilities--------------------------------------------- *)
 
 let ship_size ship_type =
   match ship_type with 
@@ -82,6 +52,41 @@ let ship_size ship_type =
   | Submarine -> 3
   | Destroyer -> 2
 
+let ship_logo ship_type =
+  match ship_type with 
+  | Carrier -> " A "
+  | Battleship -> " B "
+  | Cruiser -> " C "
+  | Submarine -> " D "
+  | Destroyer -> " E "
+
+let ship_name ship_type =
+  match ship_type with 
+  | Carrier -> "Carrier"
+  | Battleship -> "Battleship"
+  | Cruiser -> "Cruiser"
+  | Submarine -> "Submarine"
+  | Destroyer -> "Destroyer"
+
+(* ---------------------------------------Game-Functions--------------------------------------------- *)
+let print_board board = 
+  let helper_board row = 
+    List.iter (fun elem -> 
+      match elem.occupation with 
+      | Unoccupied -> 
+        (match elem.attacked with 
+          | Hit -> raise ThisWillNeverHappen
+          | Miss -> print_string " O "
+          | Not -> print_string " * ")
+      | Occupied ship_type -> 
+        match elem.attacked with 
+          | Hit -> print_string " X "
+          | Miss -> raise ThisWillNeverHappen
+          | Not -> print_string (ship_logo ship_type)
+      ) row;
+    print_newline () in 
+  List.iter helper_board board
+
 let in_bounds row col ship_size orientation = 
   match orientation with 
   | Left -> if col + 1 - ship_size < 0 then false else true
@@ -89,38 +94,37 @@ let in_bounds row col ship_size orientation =
   | Up -> if row + 1 - ship_size < 0 then false else true
   | Down -> if row - 1 + ship_size > 9 then false else true
 
-let ship_overlaps size row col orientation = 
+let overlaps_in_bounds i1 i2 row = 
+  let t_f_lst = List.mapi (fun i elem -> if i1 <= i && i <= i2 then 
+    match elem.occupation with 
+      | Unoccupied -> false
+      | Occupied _ -> true 
+  else false) row in 
+  List.exists (fun x -> x = true) t_f_lst
+
+let rec extract_rev_col_lst board col acc = 
+  match board with 
+  | [] -> acc
+  | h :: t -> extract_rev_col_lst t col (List.nth h col :: acc)
+
+let ship_overlaps board size row col orientation = 
   match orientation with 
   | Left -> 
-      let overlaps = ref false in 
-      for x=col-size+1 to col do
-        if my_board.(row).(x).occupation <> Unoccupied then
-          overlaps := true 
-      done;
-      !overlaps
-  | Right ->
-      let overlaps = ref false in 
-      for x=col to col+size-1 do
-        if my_board.(row).(x).occupation <> Unoccupied then
-          overlaps := true 
-      done;
-      !overlaps
+      let spec_row = List.nth board row in 
+      overlaps_in_bounds (col-size+1) col spec_row
+  | Right -> 
+      let spec_row = List.nth board row in 
+      overlaps_in_bounds col (col+size-1) spec_row
   | Up ->
-      let overlaps = ref false in 
-      for x=row-size+1 to row do 
-        if my_board.(x).(col).occupation <> Unoccupied then
-          overlaps := true 
-      done;
-      !overlaps
+      let col_lst = List.rev (extract_rev_col_lst board col []) in
+      overlaps_in_bounds (row-size+1) row col_lst
   | Down -> 
-      let overlaps = ref false in 
-      for x=row to row+size-1 do
-        if my_board.(x).(col).occupation <> Unoccupied then
-          overlaps := true 
-      done;
-      !overlaps
+      let col_lst = List.rev (extract_rev_col_lst board col []) in
+      overlaps_in_bounds row (row+size-1) col_lst
 
-let add_ship ship = 
+let game_dimension = 10
+
+let add_ship board ship : board = 
   let row = fst ship.start_location in
   let col = snd ship.start_location in 
   let ship_type = ship.ship_type in
@@ -128,52 +132,58 @@ let add_ship ship =
   if row < 0 || row > 9 || col < 0 || col > 9 then raise OutOfBounds else
     let size = ship_size ship_type in 
     if not (in_bounds row col size orientation) then raise OutOfBounds else 
-      if (ship_overlaps size row col orientation) then raise ShipOverlaps else 
+      if (ship_overlaps board size row col orientation) then raise ShipOverlaps else 
         match orientation with 
         | Left -> 
-          for x=col-size+1 to col do
-            my_board.(row).(x) <- {occupation=Occupied ship_type; attacked=Not}
-          done
+            List.mapi (fun i r -> 
+              if i <> row then r else
+              List.mapi (fun k elem -> 
+                if k < col-size+1 || k > col then elem else
+                  {occupation=Occupied ship_type; attacked=Not}
+                ) r 
+              ) board 
         | Right ->
-          for x=col to col+size-1 do
-            my_board.(row).(x) <- {occupation=Occupied ship_type; attacked=Not}
-          done
+            List.mapi (fun i r -> 
+              if i <> row then r else
+              List.mapi (fun k elem -> 
+                if k < col || k > col+size-1 then elem else
+                  {occupation=Occupied ship_type; attacked=Not}
+                ) r 
+              ) board 
         | Up ->
-            for x=row-size+1 to row do
-              my_board.(x).(col) <- {occupation=Occupied ship_type; attacked=Not}
-            done
+            List.mapi (fun i r -> 
+              if i < row-size+1 || i > row then r else
+              List.mapi (fun k elem -> 
+                if k = col then {occupation=Occupied ship_type; attacked=Not} else
+                  elem
+                ) r
+              ) board
         | Down -> 
-            for x=row to row+size-1 do
-              my_board.(x).(col) <- {occupation=Occupied ship_type; attacked=Not}
-            done
+            List.mapi (fun i r -> 
+              if i < row || i > row+size-1 then r else
+              List.mapi (fun k elem -> 
+                if k = col then {occupation=Occupied ship_type; attacked=Not} else
+                  elem
+                ) r
+              ) board
 
-let carrier = {ship_type=Carrier; orientation=Left; start_location=(1,9)}
-let battleship = {ship_type=Battleship; orientation=Right; start_location=(3,5)}
-let cruiser = {ship_type=Cruiser; orientation=Up; start_location=(8,9)}
-let submarine = {ship_type=Submarine; orientation=Down; start_location=(3,1)}
-let destroyer = {ship_type=Destroyer; orientation=Left; start_location=(9,3)}
+let remove_ship board ship_type =
+  List.map (fun row -> 
+    List.map (fun elem -> 
+      match elem.occupation with 
+      | Occupied ship -> if ship <> ship_type then elem else {occupation=Unoccupied; attacked=Not}
+      | Unoccupied -> elem
+      ) row
+    ) board
 
-let _ = add_ship carrier 
-
-let _ = add_ship battleship 
-
-let _ = add_ship cruiser 
-
-let _ = add_ship submarine 
-
-let _ = add_ship destroyer 
-
-exception AlreadyAttacked
-
-let attack row col = 
-  if my_board.(row).(col).attacked = Not then 
-    match my_board.(row).(col).occupation with 
-    | Occupied _ -> my_board.(row).(col).attacked <- Hit
-    | Unoccupied -> my_board.(row).(col).attacked <- Miss
-  else raise AlreadyAttacked
-
-let _ = attack 1 9
-
-let _ = print_board my_board
-
+let attack board row col : board = 
+  List.mapi (fun i r -> 
+    if i <> row then r else
+      List.mapi (fun k elem -> 
+        if k <> col then elem else
+          match elem.occupation with 
+          | Occupied _ -> {elem with attacked=Hit} 
+          | Unoccupied -> {elem with attacked=Miss} 
+        ) r
+    ) board
 
