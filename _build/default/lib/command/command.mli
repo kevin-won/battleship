@@ -15,7 +15,7 @@ type add_or_remove_ship_error =
 type add_or_remove_ship_outcome = 
 | Add of ship_type
 | Remove of ship_type
-| Error of add_or_remove_ship_error 
+| Error of add_or_remove_ship_error
 
 (** [valid_add_or_remove_ship_command] returns 
         a) [Add ship_type] if [command] is a valid command to add a ship
