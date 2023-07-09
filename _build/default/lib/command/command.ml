@@ -129,6 +129,10 @@ let in_bounds row col ship_size orientation =
   | Up -> if row + 1 - ship_size < 0 then false else true
   | Down -> if row - 1 + ship_size > 9 then false else true
 
+  let print_list lst =
+    List.iter (fun x -> print_string x) lst
+
+    
 (** [valid_orientation_and_location_command_helper] carries the work of 
     [valid_orientation_and_location_command], returning [Valid (orientation, row, col)] if
       [command] is valid or [Error e] if not. *)
@@ -144,7 +148,7 @@ let valid_orientation_and_location_command_helper str ship_type orientation ship
       if String.length right_of_comma = 0 then Error Malformed else 
       if String.sub right_of_comma (String.length right_of_comma - 1) 1 <> ")"  then Error Malformed else
         let left_num_str = String.sub left_of_comma 1 (String.length left_of_comma - 1) in 
-        let right_num_str = String.sub right_of_comma 1 (String.length right_of_comma - 1) in 
+        let right_num_str = String.sub right_of_comma 0 (String.length right_of_comma - 1) in 
         if not (is_int left_num_str) || not (is_int right_num_str) then Error NotANumber else 
           let left_num_int = left_num_str |> int_of_string in 
           let right_num_int = right_num_str |> int_of_string in 
@@ -175,7 +179,7 @@ let valid_orientation_and_location_command command ship_type ship_board =
 
 
 
-
+(* 
 let parse board str =
   let str_lst = String.split_on_char ' ' str in 
   if List.length str_lst == 0 then raise Empty else 
@@ -192,4 +196,4 @@ let parse board str =
     let col = snd start_location in 
     attack board row col;
     (* fix this *)
-  else raise Malformed
+  else raise Malformed *)

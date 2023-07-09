@@ -1,6 +1,6 @@
 open Battleship
 
 type person = {
-  my_board : board;
-  opponent_board : board;
-} 
+  my_board : ship_board;
+  opponent_board : attacked_board;
+}   

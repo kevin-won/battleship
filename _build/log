@@ -1,9 +1,9 @@
-# dune build
+# dune exec bin/main.exe
 # OCAMLPARAM: unset
 # Shared cache: disabled
 # Workspace root: /Users/kevinwon/Desktop/summer-2023/cs3110/battleship
 # Auto-detected concurrency: 10
-$ /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -config > /var/folders/ry/6h_39dn10ps57z9flhpyjl_00000gn/T/dune_096fc3_output
+$ /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -config > /var/folders/ry/6h_39dn10ps57z9flhpyjl_00000gn/T/dune_46b5aa_output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -116,27 +116,3 @@ $ /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -config > /var/folders/ry/6
 #      ; windows_unicode = false
 #      }
 #  }
-$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I lib/command/.command.objs/byte -I lib/battleship/.battleship.objs/byte -no-alias-deps -opaque -o lib/command/.command.objs/byte/command.cmi -c -intf lib/command/command.mli)
-> File "lib/command/command.mli", line 16, characters 9-18:
-> 16 | | Add of ship_type
->               ^^^^^^^^^
-> Error: Unbound type constructor ship_type
-[2]
-$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I lib/person/.person.objs/byte -I lib/battleship/.battleship.objs/byte -no-alias-deps -opaque -o lib/person/.person.objs/byte/person.cmo -c -impl lib/person/person.ml)
-> File "lib/person/person.ml", line 4, characters 13-18:
-> 4 |   my_board : board;
->                  ^^^^^
-> Error: Unbound type constructor board
-[2]
-$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I lib/battleship/.battleship.objs/byte -intf-suffix .ml -no-alias-deps -opaque -o lib/battleship/.battleship.objs/byte/battleship.cmo -c -impl lib/battleship/battleship.ml)
-> File "lib/battleship/battleship.ml", line 74, characters 4-18:
-> 74 | let game_dimension = 10
->          ^^^^^^^^^^^^^^
-> Error (warning 32 [unused-value-declaration]): unused value game_dimension.
-[2]
-$ (cd _build/default && /Users/kevinwon/.opam/cs3110-2023sp/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I lib/battleship/.battleship.objs/byte -I lib/battleship/.battleship.objs/native -intf-suffix .ml -no-alias-deps -opaque -o lib/battleship/.battleship.objs/native/battleship.cmx -c -impl lib/battleship/battleship.ml)
-> File "lib/battleship/battleship.ml", line 74, characters 4-18:
-> 74 | let game_dimension = 10
->          ^^^^^^^^^^^^^^
-> Error (warning 32 [unused-value-declaration]): unused value game_dimension.
-[2]

@@ -1,3 +1,5 @@
+open Battleship
+
 (** [add_or_remove_ship_error] represents the four kind of errors that can occur
     when a user tries to add or remove a ship: the command is empty; the command is
     not in the right format; the ship to be removed is not on the board; the ship
@@ -7,7 +9,7 @@ type add_or_remove_ship_error =
 | Malformed
 | CannotAdd
 | CannotRemove
-
+ 
 (** [add_or_remove_ship_outcome] represents the three outcomes that can occur when
     a user tries to add or remove a ship: the user successfuly adds or removes a ship,
     or cannot add nor remove a ship due to some error. Such an error would be of type
@@ -15,7 +17,7 @@ type add_or_remove_ship_error =
 type add_or_remove_ship_outcome = 
 | Add of ship_type
 | Remove of ship_type
-| Error of add_or_remove_ship_error
+| Error of add_or_remove_ship_error 
 
 (** [valid_add_or_remove_ship_command] returns 
         a) [Add ship_type] if [command] is a valid command to add a ship
@@ -32,7 +34,7 @@ type add_or_remove_ship_outcome =
             the ship board, but [ship] is not in [ships_added].
         e) [Error Empty] if [command] is an empty string.
         f) [Error Malformed] in all other cases. *)
-val valid_add_or_remove_ship_command : string -> ship_type list -> ship_type list -> add_or_remove_ship_command_one
+val valid_add_or_remove_ship_command : string -> ship_type list -> ship_type list -> add_or_remove_ship_outcome
 
 (** [orientation_and_location_error] represents the six kind of errors that can occur
     when a user tries to add or remove a ship: the command is empty; the command is

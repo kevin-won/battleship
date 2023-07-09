@@ -71,8 +71,6 @@ let ship_name ship_type =
   | Submarine -> "Submarine"
   | Destroyer -> "Destroyer"
 
-let game_dimension = 10
-
 (* ---------------------------------------Game-Functions--------------------------------------------- *)
 let print_ship_board ship_board = 
   let helper_board row = 
