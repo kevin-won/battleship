@@ -1,5 +1,5 @@
-open Battleship
-
+open Battleship  
+ 
 type input = string list
 
 exception Empty

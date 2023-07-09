@@ -3,13 +3,13 @@ open Command
  
 type person = {
   my_board : board;
-}  
+}   
 
 type state = {
-  player1 : person
+  player1 : person 
 }
-
-
+ 
+ 
 let ship_lst_to_str lst = 
   if List.length lst = 0 then "[]" else 
   let str_ships = List.fold_left (fun acc ship -> acc ^ Battleship.ship_name ship ^ ", ") "[" lst in 
@@ -50,21 +50,21 @@ let rec initialize_board board ships_to_add ships_added =
   | Add ship_type -> 
       print_string ("What's the start location and direction? ");
       let start_loc_and_direction_command = read_line () in  
-        let t = valid_start_loc_and_direction_command start_loc_and_direction_command in  
-        let orientation = fst t in
-        let start_location = snd t in  
-        let ship = {ship_type=ship_type; orientation=orientation; start_location=start_location} in 
-        let board = Battleship.add_ship board ship in
+        (match valid_start_loc_and_direction_command start_loc_and_direction_command with 
+        | Error e -> print_endline "Bad";
+        | Valid (orientation, row, col) -> 
+          let ship = {ship_type=ship_type; orientation=orientation; start_location=(row,col)} in 
+          let board = add_ship board ship in
         let new_ships_added = ship_type :: ships_added in 
         let new_ships_to_add = List.filter (fun s -> s <> ship_type) ships_to_add in
-        initialize_board board new_ships_to_add new_ships_added
- 
+        initialize_board board new_ships_to_add new_ships_added)
+
 let initialize_player () =
   let init_board = List.init (game_dimension) (fun _ -> 
     List.init (game_dimension) (fun _ -> {occupation=Unoccupied; attacked=Not})) in 
   let ships_to_add = [Carrier; Battleship; Cruiser; Submarine; Destroyer] in
-  let board = initialize_board init_board ships_to_add [] in
-  {my_board=board}
+  let ship_board = initialize_board init_board ships_to_add [] in
+  {my_board=ship_board}
 
 let initialize_game_state () = 
   print_endline "Welcome to Battleship!";
@@ -90,6 +90,6 @@ let rec game_loop game_state =
 
 let main () =
   let game_state = initialize_game_state () in
-  print_board game_state.player1.my_board
+  print_ship_board game_state.player1.my_board
 
 let _ = main ()

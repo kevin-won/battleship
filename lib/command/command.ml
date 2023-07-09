@@ -1,5 +1,5 @@
-open Battleship
-
+open Battleship  
+ 
 type input = string list
 
 exception Empty
@@ -37,11 +37,6 @@ let int_of_char c =
   | '9' -> 9
   | _ -> raise Malformed
 
-let rec remove_empty_strs lst_str acc = 
-  match lst_str with 
-  | [] -> acc 
-  | h :: t -> if h <> "" then remove_empty_strs t (h :: acc) else remove_empty_strs t acc
-
 type command =
 | Add of ship_type
 | Remove of ship_type
@@ -49,37 +44,51 @@ type command =
 | Quit 
 | Invalid
 
-type error1 =
+(* --------------------------------Add-Or-Remove-Ship: "Add Carrier"----------------------------------- *)
+
+type add_or_remove_ship_error =
 | Empty
 | Malformed
 | CannotAdd
 | CannotRemove
 
-type add_or_remove_ship_command_one = 
+type add_or_remove_ship_outcome = 
 | Add of ship_type
 | Remove of ship_type
-| Error of error1
- 
+| Error of add_or_remove_ship_error
+
+ (** [helper_valid_add_or_remove_ship_command] returns 
+        a) [Remove ship] if [remove] is [true] and [ship] is in [lst].
+        b) [Error CannotRemove] if [remove] is [true] and [ship] is not in [lst].
+        c) [Add ship] if [remove] is [false] and [ship] is in [lst].
+        d) [Error CannotAdd] if [remove] is [false] and [ship] is not in [lst]. *)
 let helper_valid_add_or_remove_ship_command ship lst remove =
   if remove then if List.mem ship lst then Remove ship else Error CannotRemove else
     if List.mem ship lst then Add ship else Error CannotAdd
  
-let valid_add_or_remove_ship_command str ships_to_add ships_added : add_or_remove_ship_command_one = 
-  if String.length str = 0 then Error Empty else 
-  let lower_str = String.lowercase_ascii str in 
-  let lst_str = String.split_on_char ' ' lower_str in 
-  let final_lst_str = List.rev (remove_empty_strs lst_str []) in 
-  if List.length final_lst_str <> 2 then Error Malformed else 
-    if List.nth final_lst_str 0 = "remove" then 
-      match List.nth final_lst_str 1 with
+(** [remove_empty_strs] takes [acc] and prepends to it all elements in [lst_str]
+    that are non-empty strings. *)
+let rec remove_empty_strs lst_str acc = 
+  match lst_str with 
+  | [] -> acc 
+  | h :: t -> if h <> "" then remove_empty_strs t (h :: acc) else remove_empty_strs t acc
+
+let valid_add_or_remove_ship_command command ships_to_add ships_added = 
+  if String.length command = 0 then Error Empty else 
+  let lowercase_command = String.lowercase_ascii command in 
+  let lst_command = String.split_on_char ' ' lowercase_command in 
+  let final_lst_command = List.rev (remove_empty_strs lst_command []) in 
+  if List.length final_lst_command <> 2 then Error Malformed else 
+    if List.nth final_lst_command 0 = "remove" then 
+      match List.nth final_lst_command 1 with
       | "carrier" -> helper_valid_add_or_remove_ship_command Carrier ships_added true
       | "battleship" -> helper_valid_add_or_remove_ship_command Battleship ships_added true
       | "cruiser" -> helper_valid_add_or_remove_ship_command Cruiser ships_added true
       | "submarine" -> helper_valid_add_or_remove_ship_command Submarine ships_added true
       | "destroyer" -> helper_valid_add_or_remove_ship_command Destroyer ships_added true
       | _ -> Error Malformed
-  else if List.nth final_lst_str 0 = "add" then 
-    match List.nth final_lst_str 1 with
+  else if List.nth final_lst_command 0 = "add" then 
+    match List.nth final_lst_command 1 with
     | "carrier" -> helper_valid_add_or_remove_ship_command Carrier ships_to_add false
     | "battleship" -> helper_valid_add_or_remove_ship_command Battleship ships_to_add false
     | "cruiser" -> helper_valid_add_or_remove_ship_command Cruiser ships_to_add false
@@ -87,6 +96,21 @@ let valid_add_or_remove_ship_command str ships_to_add ships_added : add_or_remov
     | "destroyer" -> helper_valid_add_or_remove_ship_command Destroyer ships_to_add false
     | _ -> Error Malformed
 else Error Malformed
+
+(* --------------------------------Location-and-Direction: "Left at (1,2)"----------------------------------- *)
+
+let valid_location_and_direction_command str ship_type board = 
+  if String.length str = 0 then Error Empty else 
+  let lower_str = String.lowercase_ascii str in 
+  let lst_str = String.split_on_char ' ' lower_str in 
+  let final_lst_str = List.rev (remove_empty_strs lst_str []) in 
+  if List.length final_lst_str <> 3 || List.nth final_lst_str 1 <> "at" then Error Malformed else
+    match List.nth final_lst_str 0 with 
+    | "left" -> extract_helper (List.nth final_lst_str 1) ship_type Left board
+    | "up" -> extract_helper (List.nth final_lst_str 1) ship_type Up board
+    | "right" -> extract_helper (List.nth final_lst_str 1) ship_type Right board
+    | "down" -> extract_helper (List.nth final_lst_str 1) ship_type Down board
+    | _ -> Error Malformed
 
 let is_int (s : string) : bool =
   try
@@ -137,18 +161,7 @@ let extract_helper s ship_type orientation board =
             if ship_overlaps board size left_num_int right_num_int orientation then Error ShipOverlaps else 
               Valid (orientation, left_num_int, right_num_int)
 
-let valid_start_loc_and_direction_command str ship_type board = 
-  if String.length str = 0 then Error Empty else 
-  let lower_str = String.lowercase_ascii str in 
-  let lst_str = String.split_on_char ' ' lower_str in 
-  let final_lst_str = List.rev (remove_empty_strs lst_str []) in 
-  if List.length final_lst_str <> 3 || List.nth final_lst_str 1 <> "at" then Error Malformed else
-    match List.nth final_lst_str 0 with 
-    | "left" -> extract_helper (List.nth final_lst_str 1) ship_type Left board
-    | "up" -> extract_helper (List.nth final_lst_str 1) ship_type Up board
-    | "right" -> extract_helper (List.nth final_lst_str 1) ship_type Right board
-    | "down" -> extract_helper (List.nth final_lst_str 1) ship_type Down board
-    | _ -> Error Malformed
+
 
 
 let parse board str =
