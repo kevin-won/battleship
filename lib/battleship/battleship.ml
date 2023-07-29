@@ -36,7 +36,7 @@ type block = {
 }
 
 type ship_board = block list list
-type attacked_board = attacked list list
+type opponent_board = attacked list list
 
 (* ---------------------------------------Game-Exceptions--------------------------------------------- *)
 
@@ -92,6 +92,20 @@ let print_ship_board ship_board =
     print_newline ()
   in
   List.iter helper_board ship_board
+
+let print_opponent_board opponent_board =
+  let helper_board row =
+    List.iter
+      (fun elem ->
+        match elem with
+        | Hit -> print_string " X "
+        | Miss -> print_string " O "
+        | Sunk -> print_string " S "
+        | Not -> print_string " * ")
+      row;
+    print_newline ()
+  in
+  List.iter helper_board opponent_board
 
 (** [elements_at_col] returns the elements at column [col] in [ship_board] in
     reversed order. *)

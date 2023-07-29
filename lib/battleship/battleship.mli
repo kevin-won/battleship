@@ -51,8 +51,8 @@ type ship_board = block list list
 (** [ship_board] represents the board the player will add his ships to and track
     his opponent's moves on. *)
 
-type attacked_board = attacked list list
-(** [attacked_board] represents the board the player will track his own moves on
+type opponent_board = attacked list list
+(** [opponent_board] represents the board the player will track his own moves on
     against the opponent. *)
 
 exception OutOfBounds
@@ -75,6 +75,9 @@ val ship_name : ship_type -> string
 val print_ship_board : ship_board -> unit
 (** [print_ship_board] prints the ship board based off block occupation and
     attacked state. *)
+
+val print_opponent_board : opponent_board -> unit
+(** [print_opponent_board] prints the opponent board based off attacked state. *)
 
 val ship_overlaps : ship_board -> int -> int -> int -> orientation -> bool
 (** [ship_overlaps] returns [true] if new ship collides with a previously added
