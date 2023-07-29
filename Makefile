@@ -9,5 +9,3 @@ play:
 
 test:
 	dune exec test/test.exe
-
-	
