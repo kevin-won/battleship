@@ -51,17 +51,29 @@ type ship_board = block list list
 (** [ship_board] represents the board the player will add his ships to and track
     his opponent's moves on. *)
 
-type opponent_board = attacked list list
-(** [opponent_board] represents the board the player will track his own moves on
+type attacked_board = attacked list list
+(** [attacked_board] represents the board the player will track his own moves on
     against the opponent. *)
 
-exception OutOfBounds
 (** Raised when a player adds a ship to his board that is out of bounds or
     attacks a block that's out of bounds. *)
 
-exception ShipOverlaps
 (** Raised when a player adds a ship to his board that overlaps with a
     previously added ship. *)
+
+exception Empty1
+exception Empty2
+exception Empty3
+exception Malformed1
+exception Malformed2
+exception Malformed3
+exception CannotAdd
+exception CannotRemove
+exception NotANumber
+exception OutOfBounds
+exception ShipDoesNotFit
+exception ShipOverlaps
+exception ThisWillNeverHappen
 
 val ship_size : ship_type -> int
 (** [ship_size] returns the size of a ship. *)
@@ -76,8 +88,8 @@ val print_ship_board : ship_board -> unit
 (** [print_ship_board] prints the ship board based off block occupation and
     attacked state. *)
 
-val print_opponent_board : opponent_board -> unit
-(** [print_opponent_board] prints the opponent board based off attacked state. *)
+val print_attacked_board : attacked_board -> unit
+(** [print_attacked_board] prints the opponent board based off attacked state. *)
 
 val ship_overlaps : ship_board -> int -> int -> int -> orientation -> bool
 (** [ship_overlaps] returns [true] if new ship collides with a previously added
@@ -92,3 +104,11 @@ val add_ship : ship_board -> ship -> ship_board
 val remove_ship : ship_board -> ship_type -> ship_board
 (** [remove_ship] returns the new ship board after removing [ship] from
     [ship_board]. Precondition: [ship] must be on [ship_board]. *)
+
+val in_bounds : int -> int -> int -> orientation -> bool
+
+val attack :
+  attacked list list ->
+  block list list ->
+  int * int ->
+  attacked list list * block list list * bool

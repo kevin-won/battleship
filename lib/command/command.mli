@@ -4,11 +4,6 @@ open Battleship
     when a user tries to add or remove a ship: the command is empty; the command
     is not in the right format; the ship to be removed is not on the board; the
     ship to be added is already on the board. *)
-type add_or_remove_ship_error =
-  | Empty
-  | Malformed
-  | CannotAdd
-  | CannotRemove
 
 (** [add_or_remove_ship_outcome] represents the three outcomes that can occur
     when a user tries to add or remove a ship: the user successfuly adds or
@@ -17,10 +12,10 @@ type add_or_remove_ship_error =
 type add_or_remove_ship_outcome =
   | Add of ship_type
   | Remove of ship_type
-  | Error of add_or_remove_ship_error
 
-val valid_add_or_remove_ship_command :
-  string -> ship_type list -> ship_type list -> add_or_remove_ship_outcome
+val print_exception_message : exn -> unit
+val valid_attack_command : string -> int * int
+
 (** [valid_add_or_remove_ship_command] returns a) [Add ship_type] if [command]
     is a valid command to add a ship to the ship board and [ship] is in
     [ships_to_add]. A valid command is defined as a case-insensitive string that
@@ -40,24 +35,18 @@ val valid_add_or_remove_ship_command :
     start location is a number, but it is outside the bounds of the board; the
     ship added will spill off the board; the new ship overlaps with a previously
     added ship. *)
-type orientation_and_location_error =
-  | Empty
-  | Malformed
-  | NotANumber
-  | OutOfBounds
-  | ShipDoesNotFit
-  | ShipOverlaps
 
+val valid_add_or_remove_ship_command :
+  string -> ship_type list -> ship_type list -> add_or_remove_ship_outcome
+
+type orientation_and_location_outcome = orientation * int * int
 (** [orientation_and_location_outcome] represents the two outcomes that can
     occur when a user tries to input an orientation and starting location to add
     a ship: the user successfully inputs the information, or cannot due to some
     error. Such an error would be of type [orientation_and_location_error]. *)
-type orientation_and_location_outcome =
-  | Valid of orientation * int * int
-  | Error of orientation_and_location_error
 
 val valid_orientation_and_location_command :
-  string -> ship_type -> ship_board -> orientation_and_location_outcome
+  string -> ship_type -> ship_board -> ship
 (** [valid_orientation_and_location_command] returns a)
     [Valid (<orientation>, row, col)] if [command] is a valid command for the
     orientation and start location of a ship when added to ship board. A valid

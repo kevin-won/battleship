@@ -2,40 +2,6 @@ open Battleship
 
 type input = string list
 
-exception Empty
-exception Malformed
-
-let extract_ship_type s =
-  match s with
-  | "Carrier" -> Carrier
-  | "Battleship" -> Battleship
-  | "Cruiser" -> Cruiser
-  | "Submarine" -> Submarine
-  | "Destroyer" -> Destroyer
-  | _ -> raise Malformed
-
-let extract_orientation s =
-  match s with
-  | "Left" -> Left
-  | "Right" -> Right
-  | "Up" -> Up
-  | "Down" -> Down
-  | _ -> raise Malformed
-
-let int_of_char c =
-  match c with
-  | '0' -> 0
-  | '1' -> 1
-  | '2' -> 2
-  | '3' -> 3
-  | '4' -> 4
-  | '5' -> 5
-  | '6' -> 6
-  | '7' -> 7
-  | '8' -> 8
-  | '9' -> 9
-  | _ -> raise Malformed
-
 type command =
   | Add of ship_type
   | Remove of ship_type
@@ -46,16 +12,9 @@ type command =
 (* --------------------------------Add-Or-Remove-Ship: "Add
    Carrier"----------------------------------- *)
 
-type add_or_remove_ship_error =
-  | Empty
-  | Malformed
-  | CannotAdd
-  | CannotRemove
-
 type add_or_remove_ship_outcome =
   | Add of ship_type
   | Remove of ship_type
-  | Error of add_or_remove_ship_error
 
 (** [helper_valid_add_or_remove_ship_command] returns a) [Remove ship] if
     [remove] is [true] and [ship] is in [lst]. b) [Error CannotRemove] if
@@ -63,9 +22,9 @@ type add_or_remove_ship_outcome =
     [false] and [ship] is in [lst]. d) [Error CannotAdd] if [remove] is [false]
     and [ship] is not in [lst]. *)
 let helper_valid_add_or_remove_ship_command ship lst remove =
-  if remove then if List.mem ship lst then Remove ship else Error CannotRemove
+  if remove then if List.mem ship lst then Remove ship else raise CannotRemove
   else if List.mem ship lst then Add ship
-  else Error CannotAdd
+  else raise CannotAdd
 
 (** [remove_empty_strs] takes [acc] and prepends to it all elements in [lst_str]
     that are non-empty strings. *)
@@ -76,13 +35,59 @@ let rec remove_empty_strs lst_str acc =
       if h <> "" then remove_empty_strs t (h :: acc)
       else remove_empty_strs t acc
 
+let print_error_msg msg =
+  print_endline msg;
+  print_endline ""
+
+let print_exception_message (e : exn) =
+  match e with
+  | Battleship.Empty1 ->
+      print_error_msg
+        "Command is empty. The format is: <add/remove> <ship>. Try again."
+  | Battleship.Malformed1 ->
+      print_error_msg
+        "Command is malformed. The format is: <add/remove> <ship>. Try again."
+  | Battleship.CannotAdd ->
+      print_error_msg "That ship is already on the board. Try again. "
+  | Battleship.CannotRemove ->
+      print_error_msg "That ship is already not on the board. Try again. "
+  | Battleship.Empty2 ->
+      print_error_msg
+        "Command is empty. The format is: <orientation> 'at' <start-location>. \
+         Try again."
+  | Battleship.Malformed2 ->
+      print_error_msg
+        "Command is malformed. The format is: <orientation> 'at' \
+         <start-location>. Try again."
+  | Battleship.NotANumber ->
+      print_error_msg
+        "Start location is not written as two integers. Try again."
+  | Battleship.OutOfBounds ->
+      print_error_msg
+        "Start location coordinates is out of bounds; they must be between 0 \
+         and 9, inclusive. Try again."
+  | Battleship.ShipDoesNotFit ->
+      print_error_msg
+        "Ship at given start location facing given orientation spills outside \
+         board. Try again."
+  | Battleship.ShipOverlaps ->
+      print_error_msg
+        "Ship at given start location facing given orientation collides with \
+         another ship on the board. Try again."
+  | Battleship.Empty3 ->
+      print_error_msg "Command is empty. The format is: (row,col). Try again."
+  | Battleship.Malformed3 ->
+      print_error_msg
+        "Command is malformed. The format is: (row,col). Try again."
+  | _ -> print_error_msg "dd"
+
 let valid_add_or_remove_ship_command command ships_to_add ships_added =
-  if String.length command = 0 then Error Empty
+  if String.length command = 0 then raise Empty1
   else
     let lowercase_command = String.lowercase_ascii command in
     let lst_command = String.split_on_char ' ' lowercase_command in
     let final_lst_command = List.rev (remove_empty_strs lst_command []) in
-    if List.length final_lst_command <> 2 then Error Malformed
+    if List.length final_lst_command <> 2 then raise Malformed1
     else if List.nth final_lst_command 0 = "remove" then
       match List.nth final_lst_command 1 with
       | "carrier" ->
@@ -95,7 +100,7 @@ let valid_add_or_remove_ship_command command ships_to_add ships_added =
           helper_valid_add_or_remove_ship_command Submarine ships_added true
       | "destroyer" ->
           helper_valid_add_or_remove_ship_command Destroyer ships_added true
-      | _ -> Error Malformed
+      | _ -> raise Malformed1
     else if List.nth final_lst_command 0 = "add" then
       match List.nth final_lst_command 1 with
       | "carrier" ->
@@ -108,23 +113,13 @@ let valid_add_or_remove_ship_command command ships_to_add ships_added =
           helper_valid_add_or_remove_ship_command Submarine ships_to_add false
       | "destroyer" ->
           helper_valid_add_or_remove_ship_command Destroyer ships_to_add false
-      | _ -> Error Malformed
-    else Error Malformed
+      | _ -> raise Malformed1
+    else raise Malformed1
 
 (* --------------------------------Location-and-Direction: "Left at
    (1,2)"----------------------------------- *)
 
-type orientation_and_location_error =
-  | Empty
-  | Malformed
-  | NotANumber
-  | OutOfBounds
-  | ShipDoesNotFit
-  | ShipOverlaps
-
-type orientation_and_location_outcome =
-  | Valid of orientation * int * int
-  | Error of orientation_and_location_error
+type orientation_and_location_outcome = orientation * int * int
 
 (** [is_int] returns [true] if [s] is an int, [false] otherwise. *)
 let is_int s =
@@ -133,36 +128,22 @@ let is_int s =
     true
   with Failure _ -> false
 
-(** [in_bounds] returns [true] if starting at [(row,col)], facing [orientation],
-    the ship will stay on the board according to [ship_size]. Precondition:
-    [(row,col)] is a valid start location, i.e. 0 <= row, col <= 9. *)
-let in_bounds row col ship_size orientation =
-  match orientation with
-  | Left -> if col + 1 - ship_size < 0 then false else true
-  | Right -> if col - 1 + ship_size > 9 then false else true
-  | Up -> if row + 1 - ship_size < 0 then false else true
-  | Down -> if row - 1 + ship_size > 9 then false else true
-
 let print_list lst = List.iter (fun x -> print_string x) lst
 
-(** [valid_orientation_and_location_command_helper] carries the work of
-    [valid_orientation_and_location_command], returning
-    [Valid (orientation, row, col)] if [command] is valid or [Error e] if not. *)
-let valid_orientation_and_location_command_helper str ship_type orientation
-    ship_board =
+let extract_coordinates str malformed =
   let split_string_lst = String.split_on_char ',' str in
   let final_lst_str = List.rev (remove_empty_strs split_string_lst []) in
-  if List.length final_lst_str <> 2 then Error Malformed
+  if List.length final_lst_str <> 2 then raise malformed
   else
     let left_of_comma = List.nth final_lst_str 0 in
-    if String.length left_of_comma = 0 then Error Malformed
-    else if String.sub left_of_comma 0 1 <> "(" then Error Malformed
+    if String.length left_of_comma = 0 then raise malformed
+    else if String.sub left_of_comma 0 1 <> "(" then raise malformed
     else
       let right_of_comma = List.nth final_lst_str 1 in
-      if String.length right_of_comma = 0 then Error Malformed
+      if String.length right_of_comma = 0 then raise malformed
       else if
         String.sub right_of_comma (String.length right_of_comma - 1) 1 <> ")"
-      then Error Malformed
+      then raise malformed
       else
         let left_num_str =
           String.sub left_of_comma 1 (String.length left_of_comma - 1)
@@ -171,33 +152,44 @@ let valid_orientation_and_location_command_helper str ship_type orientation
           String.sub right_of_comma 0 (String.length right_of_comma - 1)
         in
         if (not (is_int left_num_str)) || not (is_int right_num_str) then
-          Error NotANumber
+          raise NotANumber
         else
           let left_num_int = left_num_str |> int_of_string in
           let right_num_int = right_num_str |> int_of_string in
           if
             left_num_int < 0 || left_num_int > 9 || right_num_int < 0
             || right_num_int > 9
-          then Error OutOfBounds
-          else
-            let size = ship_size ship_type in
-            if not (in_bounds left_num_int right_num_int size orientation) then
-              Error ShipDoesNotFit
-            else if
-              ship_overlaps ship_board size left_num_int right_num_int
-                orientation
-            then Error ShipOverlaps
-            else Valid (orientation, left_num_int, right_num_int)
+          then raise OutOfBounds
+          else (left_num_int, right_num_int)
+
+let valid_attack_command command =
+  let trimmed_command = String.trim command in
+  if String.length trimmed_command = 0 then raise Empty3
+  else extract_coordinates trimmed_command Malformed3
+
+(** [valid_orientation_and_location_command_helper] carries the work of
+    [valid_orientation_and_location_command], returning
+    [Valid (orientation, row, col)] if [command] is valid or [Error e] if not. *)
+let valid_orientation_and_location_command_helper str ship_type orientation
+    ship_board =
+  let coordinates = extract_coordinates str Malformed2 in
+  let row = fst coordinates in
+  let col = snd coordinates in
+  let size = ship_size ship_type in
+  if not (in_bounds row col size orientation) then raise ShipDoesNotFit
+  else if ship_overlaps ship_board size row col orientation then
+    raise ShipOverlaps
+  else { ship_type; orientation; start_location = (row, col) }
 
 let valid_orientation_and_location_command command ship_type ship_board =
-  if String.length command = 0 then Error Empty
+  if String.length command = 0 then raise Empty2
   else
     let lowercase_command = String.lowercase_ascii command in
     let lst_command = String.split_on_char ' ' lowercase_command in
     let final_lst_command = List.rev (remove_empty_strs lst_command []) in
     if
       List.length final_lst_command <> 3 || List.nth final_lst_command 1 <> "at"
-    then Error Malformed
+    then raise Malformed2
     else
       match List.nth final_lst_command 0 with
       | "left" ->
@@ -216,7 +208,7 @@ let valid_orientation_and_location_command command ship_type ship_board =
           valid_orientation_and_location_command_helper
             (List.nth final_lst_command 2)
             ship_type Down ship_board
-      | _ -> Error Malformed
+      | _ -> raise Malformed2
 
 (* let parse board str = let str_lst = String.split_on_char ' ' str in if
    List.length str_lst == 0 then raise Empty else if List.nth str_lst 0 = "Add"
