@@ -59,6 +59,8 @@ type attacked_board = attacked list list
 
 (* ---------------------------------------Game-Exceptions--------------------------------------------- *)
 
+(** All exceptions defined below are specified in [command.mli]. *)
+
 exception Empty1
 exception Empty2
 exception Empty3
@@ -93,18 +95,6 @@ val print_ship_board : ship_board -> unit
 val print_attacked_board : attacked_board -> unit
 (** [print_attacked_board] prints the attacked board based off attacked state. *)
 
-(* ---------------------------------------Start-Here--------------------------------------------- *)
-
-val ship_overlaps : ship_board -> int -> int -> int -> orientation -> bool
-(** [ship_overlaps] returns [true] if new ship collides with a previously added
-    ship and returns [false] otherwise. Precondition: the ship added at [row]
-    and [col] with [orientation] must fit on board. *)
-
-val in_bounds : int -> int -> int -> orientation -> bool
-
-(* ----------------------------BELOW THIS IS
-   GOOD----------------------------------- *)
-
 val add_ship : ship_board -> ship -> ship_board
 (** [add_ship] returns the new ship board after adding [ship] to [ship_board]. *)
 
@@ -118,3 +108,15 @@ val attack :
     for the player attacking, the second entry is the new ship board for the
     player being attacked, and the third entry is a boolean value representing
     whether the attack resulted in a hit or not. *)
+
+(* ---------------------------------------HELPERS--------------------------------------------- *)
+
+val ship_overlaps : ship_board -> ship -> bool
+(** [ship_overlaps] returns [true] if [ship] collides with a previously added
+    ship on [ship_board]; returns [false] otherwise. Precondition: the ship
+    added at [ship.start_location] facing [ship.orientation] must fit on board. *)
+
+val ship_fits : ship -> bool
+(** [ship_fits] returns [true] if [ship] fits on board, given that its starting
+    location is at [ship.start_location] and it faces [ship.orientation];
+    [false] otherwise. Precondition: [start_location] is a valid start location. *)

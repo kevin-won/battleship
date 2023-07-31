@@ -122,72 +122,6 @@ let print_attacked_board attacked_board =
   in
   List.iter helper_board attacked_board
 
-(* ---------------------------------------Start-Here--------------------------------------------- *)
-
-(** [elements_at_col] returns the elements at column [col] in [ship_board] in
-    reversed order. *)
-let rec elements_at_col ship_board col acc =
-  match ship_board with
-  | [] -> acc
-  | row :: rest_of_board ->
-      elements_at_col rest_of_board col (List.nth row col :: acc)
-
-(** [ship_overlaps_helper] returns true if at least one element in [row] between
-    [i1] and [i2], inclusive, is [Occupied]. *)
-let ship_overlaps_helper i1 i2 row =
-  let true_false_lst =
-    List.mapi
-      (fun i elem ->
-        if i1 <= i && i <= i2 then
-          match elem.occupation with
-          | Unoccupied -> false
-          | Occupied _ -> true
-        else false)
-      row
-  in
-  List.exists (fun x -> x = true) true_false_lst
-
-let ship_overlaps ship_board size row col orientation =
-  match orientation with
-  | Left ->
-      let specific_row = List.nth ship_board row in
-      ship_overlaps_helper (col - size + 1) col specific_row
-  | Right ->
-      let specific_row = List.nth ship_board row in
-      ship_overlaps_helper col (col + size - 1) specific_row
-  | Up ->
-      let col_lst = List.rev (elements_at_col ship_board col []) in
-      ship_overlaps_helper (row - size + 1) row col_lst
-  | Down ->
-      let col_lst = List.rev (elements_at_col ship_board col []) in
-      ship_overlaps_helper row (row + size - 1) col_lst
-
-(** [in_bounds] returns [true] if starting at [(row,col)], facing [orientation],
-    the ship will stay on the board according to [ship_size]. Precondition:
-    [(row,col)] is a valid start location, i.e. 0 <= row, col <= 9. *)
-let in_bounds row col ship_size orientation =
-  match orientation with
-  | Left -> if col + 1 - ship_size < 0 then false else true
-  | Right -> if col - 1 + ship_size > 9 then false else true
-  | Up -> if row + 1 - ship_size < 0 then false else true
-  | Down -> if row - 1 + ship_size > 9 then false else true
-
-let shipSatisfiesPrecondition ship_board ship =
-  let row = fst ship.start_location in
-  let col = snd ship.start_location in
-  let ship_type = ship.ship_type in
-  let orientation = ship.orientation in
-  if row < 0 || row > 9 || col < 0 || col > 9 then raise OutOfBounds
-  else
-    let size = ship_size ship_type in
-    if not (in_bounds row col size orientation) then raise ShipDoesNotFit
-    else if ship_overlaps ship_board size row col orientation then
-      raise ShipOverlaps
-    else true
-
-(* --------------------------------BELOW THIS IS
-   GOOD---------------------------------------- *)
-
 let add_ship ship_board ship =
   let row = fst ship.start_location in
   let col = snd ship.start_location in
@@ -255,6 +189,7 @@ let remove_ship ship_board ship_type =
         row)
     ship_board
 
+(** [get_value_at] returns the element at [row][col] in the 2D list, [board]. *)
 let get_value_at board row col =
   let row_list = List.nth board row in
   List.nth row_list col
@@ -297,3 +232,56 @@ let attack my_attacked_board opponent_ship_board coordinates =
           my_attacked_board
       in
       (my_attacked_board, opponent_ship_board, true)
+
+(*-----------------------------HELPERS--------------------------*)
+
+(** [elements_at_col] returns the elements at column [col] in [ship_board] in
+    reversed order. *)
+let rec elements_at_col ship_board col acc =
+  match ship_board with
+  | [] -> acc
+  | row :: rest_of_board ->
+      elements_at_col rest_of_board col (List.nth row col :: acc)
+
+(** [ship_overlaps_helper] returns true if at least one element in [row] between
+    [i1] and [i2], inclusive, is [Occupied]. *)
+let ship_overlaps_helper i1 i2 row =
+  let true_false_lst =
+    List.mapi
+      (fun i elem ->
+        if i1 <= i && i <= i2 then
+          match elem.occupation with
+          | Unoccupied -> false
+          | Occupied _ -> true
+        else false)
+      row
+  in
+  List.exists (fun x -> x = true) true_false_lst
+
+let ship_overlaps ship_board ship =
+  let row = fst ship.start_location in
+  let col = snd ship.start_location in
+  let ship_size = ship_size ship.ship_type in
+  match ship.orientation with
+  | Left ->
+      let specific_row = List.nth ship_board row in
+      ship_overlaps_helper (col - ship_size + 1) col specific_row
+  | Right ->
+      let specific_row = List.nth ship_board row in
+      ship_overlaps_helper col (col + ship_size - 1) specific_row
+  | Up ->
+      let col_lst = List.rev (elements_at_col ship_board col []) in
+      ship_overlaps_helper (row - ship_size + 1) row col_lst
+  | Down ->
+      let col_lst = List.rev (elements_at_col ship_board col []) in
+      ship_overlaps_helper row (row + ship_size - 1) col_lst
+
+let ship_fits ship =
+  let row = fst ship.start_location in
+  let col = snd ship.start_location in
+  let ship_size = ship_size ship.ship_type in
+  match ship.orientation with
+  | Left -> if col + 1 - ship_size < 0 then false else true
+  | Right -> if col - 1 + ship_size > 9 then false else true
+  | Up -> if row + 1 - ship_size < 0 then false else true
+  | Down -> if row - 1 + ship_size > 9 then false else true

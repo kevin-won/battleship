@@ -122,6 +122,119 @@ let print_attacked_board attacked_board =
   in
   List.iter helper_board attacked_board
 
+let add_ship ship_board ship =
+  let row = fst ship.start_location in
+  let col = snd ship.start_location in
+  let ship_type = ship.ship_type in
+  let orientation = ship.orientation in
+  let size = ship_size ship_type in
+  match orientation with
+  | Left ->
+      List.mapi
+        (fun i r ->
+          if i <> row then r
+          else
+            List.mapi
+              (fun k elem ->
+                if k < col - size + 1 || k > col then elem
+                else { occupation = Occupied ship_type; attacked = Not })
+              r)
+        ship_board
+  | Right ->
+      List.mapi
+        (fun i r ->
+          if i <> row then r
+          else
+            List.mapi
+              (fun k elem ->
+                if k < col || k > col + size - 1 then elem
+                else { occupation = Occupied ship_type; attacked = Not })
+              r)
+        ship_board
+  | Up ->
+      List.mapi
+        (fun i r ->
+          if i < row - size + 1 || i > row then r
+          else
+            List.mapi
+              (fun k elem ->
+                if k = col then
+                  { occupation = Occupied ship_type; attacked = Not }
+                else elem)
+              r)
+        ship_board
+  | Down ->
+      List.mapi
+        (fun i r ->
+          if i < row || i > row + size - 1 then r
+          else
+            List.mapi
+              (fun k elem ->
+                if k = col then
+                  { occupation = Occupied ship_type; attacked = Not }
+                else elem)
+              r)
+        ship_board
+
+let remove_ship ship_board ship_type =
+  List.map
+    (fun row ->
+      List.map
+        (fun elem ->
+          match elem.occupation with
+          | Occupied ship ->
+              if ship <> ship_type then elem
+              else { occupation = Unoccupied; attacked = Not }
+          | Unoccupied -> elem)
+        row)
+    ship_board
+
+(** [get_value_at] returns the element at [row][col] in the 2D list, [board]. *)
+let get_value_at board row col =
+  let row_list = List.nth board row in
+  List.nth row_list col
+
+let attack my_attacked_board opponent_ship_board coordinates =
+  let row = fst coordinates in
+  let col = snd coordinates in
+  let opponent_ship_board =
+    List.mapi
+      (fun i r ->
+        if i <> row then r
+        else
+          List.mapi
+            (fun k elem ->
+              if k <> col then elem
+              else
+                match elem.occupation with
+                | Occupied _ -> { elem with attacked = Hit }
+                | Unoccupied -> { elem with attacked = Miss })
+            r)
+      opponent_ship_board
+  in
+  let block = get_value_at opponent_ship_board row col in
+  match block.occupation with
+  | Unoccupied ->
+      let my_attacked_board =
+        List.mapi
+          (fun i r ->
+            if i <> row then r
+            else List.mapi (fun k elem -> if k <> col then elem else Miss) r)
+          my_attacked_board
+      in
+      (my_attacked_board, opponent_ship_board, false)
+  | Occupied _ ->
+      let my_attacked_board =
+        List.mapi
+          (fun i r ->
+            if i <> row then r
+            else List.mapi (fun k elem -> if k <> col then elem else Hit) r)
+          my_attacked_board
+      in
+      (my_attacked_board, opponent_ship_board, true)
+
+(*-----------------------------HELPERS--------------------------*)
+
 (** [elements_at_col] returns the elements at column [col] in [ship_board] in
     reversed order. *)
 let rec elements_at_col ship_board col acc =
@@ -145,154 +258,30 @@ let ship_overlaps_helper i1 i2 row =
   in
   List.exists (fun x -> x = true) true_false_lst
 
-let ship_overlaps ship_board size row col orientation =
-  match orientation with
+let ship_overlaps ship_board ship =
+  let row = fst ship.start_location in
+  let col = snd ship.start_location in
+  let ship_size = ship_size ship.ship_type in
+  match ship.orientation with
   | Left ->
       let specific_row = List.nth ship_board row in
-      ship_overlaps_helper (col - size + 1) col specific_row
+      ship_overlaps_helper (col - ship_size + 1) col specific_row
   | Right ->
       let specific_row = List.nth ship_board row in
-      ship_overlaps_helper col (col + size - 1) specific_row
+      ship_overlaps_helper col (col + ship_size - 1) specific_row
   | Up ->
       let col_lst = List.rev (elements_at_col ship_board col []) in
-      ship_overlaps_helper (row - size + 1) row col_lst
+      ship_overlaps_helper (row - ship_size + 1) row col_lst
   | Down ->
       let col_lst = List.rev (elements_at_col ship_board col []) in
-      ship_overlaps_helper row (row + size - 1) col_lst
+      ship_overlaps_helper row (row + ship_size - 1) col_lst
 
-(** [in_bounds] returns [true] if starting at [(row,col)], facing [orientation],
-    the ship will stay on the board according to [ship_size]. Precondition:
-    [(row,col)] is a valid start location, i.e. 0 <= row, col <= 9. *)
-let in_bounds row col ship_size orientation =
-  match orientation with
+let ship_fits ship =
+  let row = fst ship.start_location in
+  let col = snd ship.start_location in
+  let ship_size = ship_size ship.ship_type in
+  match ship.orientation with
   | Left -> if col + 1 - ship_size < 0 then false else true
   | Right -> if col - 1 + ship_size > 9 then false else true
   | Up -> if row + 1 - ship_size < 0 then false else true
   | Down -> if row - 1 + ship_size > 9 then false else true
-
-let shipSatisfiesPrecondition ship_board ship =
-  let row = fst ship.start_location in
-  let col = snd ship.start_location in
-  let ship_type = ship.ship_type in
-  let orientation = ship.orientation in
-  if row < 0 || row > 9 || col < 0 || col > 9 then raise OutOfBounds
-  else
-    let size = ship_size ship_type in
-    if not (in_bounds row col size orientation) then raise ShipDoesNotFit
-    else if ship_overlaps ship_board size row col orientation then
-      raise ShipOverlaps
-    else true
-
-let add_ship ship_board ship =
-  if shipSatisfiesPrecondition ship_board ship then
-    let row = fst ship.start_location in
-    let col = snd ship.start_location in
-    let ship_type = ship.ship_type in
-    let orientation = ship.orientation in
-    let size = ship_size ship_type in
-    match orientation with
-    | Left ->
-        List.mapi
-          (fun i r ->
-            if i <> row then r
-            else
-              List.mapi
-                (fun k elem ->
-                  if k < col - size + 1 || k > col then elem
-                  else { occupation = Occupied ship_type; attacked = Not })
-                r)
-          ship_board
-    | Right ->
-        List.mapi
-          (fun i r ->
-            if i <> row then r
-            else
-              List.mapi
-                (fun k elem ->
-                  if k < col || k > col + size - 1 then elem
-                  else { occupation = Occupied ship_type; attacked = Not })
-                r)
-          ship_board
-    | Up ->
-        List.mapi
-          (fun i r ->
-            if i < row - size + 1 || i > row then r
-            else
-              List.mapi
-                (fun k elem ->
-                  if k = col then
-                    { occupation = Occupied ship_type; attacked = Not }
-                  else elem)
-                r)
-          ship_board
-    | Down ->
-        List.mapi
-          (fun i r ->
-            if i < row || i > row + size - 1 then r
-            else
-              List.mapi
-                (fun k elem ->
-                  if k = col then
-                    { occupation = Occupied ship_type; attacked = Not }
-                  else elem)
-                r)
-          ship_board
-  else raise Empty1
-
-let remove_ship ship_board ship_type =
-  List.map
-    (fun row ->
-      List.map
-        (fun elem ->
-          match elem.occupation with
-          | Occupied ship ->
-              if ship <> ship_type then elem
-              else { occupation = Unoccupied; attacked = Not }
-          | Unoccupied -> elem)
-        row)
-    ship_board
-
-(* ---------------------------------------Start-Here--------------------------------------------- *)
-
-let get_value_at board row col =
-  let row_list = List.nth board row in
-  List.nth row_list col
-
-let attack attacked_board opponent_ship_board coordinates =
-  let row = fst coordinates in
-  let col = snd coordinates in
-  let opponent_ship_board =
-    List.mapi
-      (fun i r ->
-        if i <> row then r
-        else
-          List.mapi
-            (fun k elem ->
-              if k <> col then elem
-              else
-                match elem.occupation with
-                | Occupied _ -> { elem with attacked = Hit }
-                | Unoccupied -> { elem with attacked = Miss })
-            r)
-      opponent_ship_board
-  in
-  let block = get_value_at opponent_ship_board row col in
-  match block.occupation with
-  | Unoccupied ->
-      let attacked_board =
-        List.mapi
-          (fun i r ->
-            if i <> row then r
-            else List.mapi (fun k elem -> if k <> col then elem else Miss) r)
-          attacked_board
-      in
-      (attacked_board, opponent_ship_board, false)
-  | Occupied _ ->
-      let attacked_board =
-        List.mapi
-          (fun i r ->
-            if i <> row then r
-            else List.mapi (fun k elem -> if k <> col then elem else Hit) r)
-          attacked_board
-      in
-      (attacked_board, opponent_ship_board, true)
