@@ -1,0 +1,3 @@
+(library
+ (name server)
+ (libraries battleship lwt cohttp cohttp-lwt-unix))
