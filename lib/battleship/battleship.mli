@@ -49,13 +49,20 @@ type block = {
 }
 (** [block] represents a block on the ship board. *)
 
-type ship_board = block list list
-(** [ship_board] represents the board the player will add his ships to and track
-    his opponent's moves on. *)
+type board = block list list
+(** [board] represents the ship board the player will add his ships to and track
+    his opponent's moves on, and it will also represent the attacked board where
+    the player will track his moves on against the opponent. *)
 
-type attacked_board = attacked list list
-(** [attacked_board] represents the board the player will track his own moves on
-    against the opponent. *)
+type ship_health = {
+  carrier : int;
+  battleship : int;
+  cruiser : int;
+  submarine : int;
+  destroyer : int;
+}
+(** [ship_health] represents the health of each ship, measured in terms of hits
+    left before being sunk. *)
 
 (* ---------------------------------------Game-Exceptions--------------------------------------------- *)
 
@@ -73,6 +80,7 @@ exception NotANumber
 exception OutOfBounds
 exception ShipDoesNotFit
 exception ShipOverlaps
+exception AlreadyAttacked
 exception ThisWillNeverHappen
 
 (* ---------------------------------------Utilities--------------------------------------------- *)
@@ -88,30 +96,48 @@ val ship_name : ship_type -> string
 
 (* ---------------------------------------Game-Functions--------------------------------------------- *)
 
-val print_ship_board : ship_board -> unit
+val init_board : board
+(** [init_board] creates an empty board. *)
+
+val init_ship_health : ship_health
+(** [init_ship_health] defines a record that sets the health of each ship to its
+    maximum. *)
+
+val init_ships_to_add : ship_type list
+(** [init_ships_to_add] represents the ships ready to be added to ship board at
+    the start of the game. *)
+
+val print_ship_board : board -> unit
 (** [print_ship_board] prints the ship board based off block occupation and
     attacked state. *)
 
-val print_attacked_board : attacked_board -> unit
+val print_attacked_board : board -> unit
 (** [print_attacked_board] prints the attacked board based off attacked state. *)
 
-val add_ship : ship_board -> ship -> ship_board
+val add_ship : board -> ship -> board
 (** [add_ship] returns the new ship board after adding [ship] to [ship_board]. *)
 
-val remove_ship : ship_board -> ship_type -> ship_board
+val remove_ship : board -> ship_type -> board
 (** [remove_ship] returns the new ship board after removing [ship] from
     [ship_board]. *)
 
 val attack :
-  attacked_board -> ship_board -> position -> attacked_board * ship_board * bool
-(** [attack] returns a 3-tuple, where the first entry is the new attacked board
+  board ->
+  board ->
+  ship_health ->
+  position ->
+  board * board * ship_health * attacked
+(** [attack] returns a 4-tuple, where the first entry is the new attacked board
     for the player attacking, the second entry is the new ship board for the
-    player being attacked, and the third entry is a boolean value representing
-    whether the attack resulted in a hit or not. *)
+    opponent, the third entry is the new ship health for the opponent, and the
+    fourth entry indicates the attack outcome. *)
+
+val game_over : ship_health -> bool
+(** [game_over] returns [true] if all the fields in [ship_health] are set to 0. *)
 
 (* ---------------------------------------HELPERS--------------------------------------------- *)
 
-val ship_overlaps : ship_board -> ship -> bool
+val ship_overlaps : board -> ship -> bool
 (** [ship_overlaps] returns [true] if [ship] collides with a previously added
     ship on [ship_board]; returns [false] otherwise. Precondition: the ship
     added at [ship.start_location] facing [ship.orientation] must fit on board. *)
@@ -120,3 +146,6 @@ val ship_fits : ship -> bool
 (** [ship_fits] returns [true] if [ship] fits on board, given that its starting
     location is at [ship.start_location] and it faces [ship.orientation];
     [false] otherwise. Precondition: [start_location] is a valid start location. *)
+
+val get_value_at : board -> position -> block
+(** [get_value_at] returns the block at [coordinates] in the 2D list, [board]. *)

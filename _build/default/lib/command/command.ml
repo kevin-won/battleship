@@ -75,16 +75,26 @@ let is_int s =
     true
   with Failure _ -> false
 
-let extract_coordinates str malformed =
-  let split_string_lst = String.split_on_char ',' str in
-  let final_lst_str = List.rev (remove_empty_strs split_string_lst []) in
-  if List.length final_lst_str <> 2 then raise malformed
+(** [extract_coordinates] returns the coordinates expressed in
+    [coordinates_command] if [coordinates_command] is valid. A valid
+    [coordinates_command] is defined as a single word with no spaces in the form
+    "(row,col)", where row and col are integers from 0 to 9, inclusive. If
+    command is not valid, an exception is raised.
+
+    (a) [NotANumber] is raised if the command contains coordinates, but the
+    coordinates are not written as integers; (b) [OutOfBounds] is raised if the
+    coordinates given are not from 0 to 9, inclusive; (c) [malformed] is raised
+    in all other cases, and [malformed] for our game will be either [Malformed2]
+    when used to add ships, or [Malformed3] when used to attack a ship. *)
+let extract_coordinates coordinates_command malformed =
+  let split_string_lst = String.split_on_char ',' coordinates_command in
+  if List.length split_string_lst <> 2 then raise malformed
   else
-    let left_of_comma = List.nth final_lst_str 0 in
+    let left_of_comma = List.nth split_string_lst 0 in
     if String.length left_of_comma = 0 then raise malformed
     else if String.sub left_of_comma 0 1 <> "(" then raise malformed
     else
-      let right_of_comma = List.nth final_lst_str 1 in
+      let right_of_comma = List.nth split_string_lst 1 in
       if String.length right_of_comma = 0 then raise malformed
       else if
         String.sub right_of_comma (String.length right_of_comma - 1) 1 <> ")"
@@ -107,12 +117,20 @@ let extract_coordinates str malformed =
           then raise OutOfBounds
           else (left_num_int, right_num_int)
 
-(** [valid_orientation_and_location_command_helper] carries the work of
-    [valid_orientation_and_location_command], returning
-    [Valid (orientation, row, col)] if [command] is valid or [Error e] if not. *)
-let valid_orientation_and_location_command_helper command ship_type orientation
-    ship_board =
-  let start_location = extract_coordinates command Malformed2 in
+(** [valid_orientation_and_location_command_helper] returns the new ship to be
+    added to ship board if [coordinates_command] is valid, and raises an
+    exception if [coordinates_command] is not valid. A valid
+    [coordinates_command] is defined in [extract_coordinates].
+
+    Since this function calls [extract_coordinates], any exception thrown in
+    [extract_coordinates] will be thrown here. Additional exceptions that might
+    be thrown in this function are (a) [ShipDoesNotFit] if the ship at its start
+    location facing [orientation] spills outside the board, and (b)
+    [ShipOverlaps] if the ship at its start location facing [orientation]
+    collides with another ship on [ship_board]. *)
+let valid_orientation_and_location_command_helper coordinates_command ship_type
+    orientation ship_board =
+  let start_location = extract_coordinates coordinates_command Malformed2 in
   let ship = { ship_type; orientation; start_location } in
   if not (ship_fits ship) then raise ShipDoesNotFit
   else if ship_overlaps ship_board ship then raise ShipOverlaps
@@ -148,10 +166,18 @@ let valid_orientation_and_location_command command ship_type ship_board =
       | _ -> raise Malformed2
 
 (*-------------------- ATTACK ------------------------------------------*)
-let valid_attack_command command =
-  let trimmed_command = String.trim command in
-  if String.length trimmed_command = 0 then raise Empty3
-  else extract_coordinates trimmed_command Malformed3
+
+let valid_attack_command coordinates_command attacked_board =
+  let trimmed_coordinates_command = String.trim coordinates_command in
+  if String.length trimmed_coordinates_command = 0 then raise Empty3
+  else
+    let coordinates =
+      extract_coordinates trimmed_coordinates_command Malformed3
+    in
+    let block = get_value_at attacked_board coordinates in
+    if block.attacked <> Not then raise AlreadyAttacked else coordinates
+
+(** -------------------------UTILITY-------------------------*)
 
 let print_error_msg msg =
   print_endline msg;
@@ -197,4 +223,5 @@ let print_exception_message e =
   | Malformed3 ->
       print_error_msg
         "Command is malformed. The format is: (row,col). Try again."
-  | _ -> print_error_msg "dd"
+  | AlreadyAttacked -> print_error_msg "You already attacked there. Try again."
+  | _ -> raise ThisWillNeverHappen

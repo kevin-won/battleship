@@ -167,10 +167,15 @@ let valid_orientation_and_location_command command ship_type ship_board =
 
 (*-------------------- ATTACK ------------------------------------------*)
 
-let valid_attack_command coordinates_command =
+let valid_attack_command coordinates_command attacked_board =
   let trimmed_coordinates_command = String.trim coordinates_command in
   if String.length trimmed_coordinates_command = 0 then raise Empty3
-  else extract_coordinates trimmed_coordinates_command Malformed3
+  else
+    let coordinates =
+      extract_coordinates trimmed_coordinates_command Malformed3
+    in
+    let block = get_value_at attacked_board coordinates in
+    if block.attacked <> Not then raise AlreadyAttacked else coordinates
 
 (** -------------------------UTILITY-------------------------*)
 
@@ -218,4 +223,5 @@ let print_exception_message e =
   | Malformed3 ->
       print_error_msg
         "Command is malformed. The format is: (row,col). Try again."
+  | AlreadyAttacked -> print_error_msg "You already attacked there. Try again."
   | _ -> raise ThisWillNeverHappen

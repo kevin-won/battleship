@@ -35,8 +35,15 @@ type block = {
   attacked : attacked;
 }
 
-type ship_board = block list list
-type attacked_board = attacked list list
+type board = block list list
+
+type ship_health = {
+  carrier : int;
+  battleship : int;
+  cruiser : int;
+  submarine : int;
+  destroyer : int;
+}
 
 (* ---------------------------------------Game-Exceptions--------------------------------------------- *)
 
@@ -52,6 +59,7 @@ exception NotANumber
 exception OutOfBounds
 exception ShipDoesNotFit
 exception ShipOverlaps
+exception AlreadyAttacked
 exception ThisWillNeverHappen
 
 (* ---------------------------------------Utilities--------------------------------------------- *)
@@ -85,6 +93,17 @@ let ship_name ship_type =
 let print_orange str = print_string ("\027[38;5;208m" ^ str ^ "\027[0m")
 let print_red str = print_string ("\027[31m" ^ str ^ "\027[0m")
 let print_blue str = print_string ("\027[34m" ^ str ^ "\027[0m")
+let game_dimension = 10
+
+let init_board =
+  List.init game_dimension (fun _ ->
+      List.init game_dimension (fun _ ->
+          { occupation = Unoccupied; attacked = Not }))
+
+let init_ship_health =
+  { carrier = 5; battleship = 4; cruiser = 3; submarine = 3; destroyer = 2 }
+
+let init_ships_to_add = [ Carrier; Battleship; Cruiser; Submarine; Destroyer ]
 
 let print_ship_board ship_board =
   let helper_board row =
@@ -112,11 +131,19 @@ let print_attacked_board attacked_board =
   let helper_board row =
     List.iter
       (fun elem ->
-        match elem with
-        | Hit -> print_orange " X "
-        | Miss -> print_blue " O "
-        | Sunk -> print_red " S "
-        | Not -> print_string " * ")
+        match elem.occupation with
+        | Unoccupied -> (
+            match elem.attacked with
+            | Hit -> raise ThisWillNeverHappen
+            | Miss -> print_blue " O "
+            | Sunk -> raise ThisWillNeverHappen
+            | Not -> print_string " * ")
+        | Occupied _ -> (
+            match elem.attacked with
+            | Hit -> print_orange " X "
+            | Miss -> raise ThisWillNeverHappen
+            | Sunk -> print_red " S "
+            | Not -> print_string " * "))
       row;
     print_newline ()
   in
@@ -189,49 +216,91 @@ let remove_ship ship_board ship_type =
         row)
     ship_board
 
-(** [get_value_at] returns the element at [row][col] in the 2D list, [board]. *)
-let get_value_at board row col =
+let get_value_at board coordinates =
+  let row = fst coordinates in
+  let col = snd coordinates in
   let row_list = List.nth board row in
   List.nth row_list col
 
-let attack my_attacked_board opponent_ship_board coordinates =
+let lower_ship_health ship_health ship_type =
+  match ship_type with
+  | Carrier -> { ship_health with carrier = ship_health.carrier - 1 }
+  | Battleship -> { ship_health with battleship = ship_health.battleship - 1 }
+  | Cruiser -> { ship_health with cruiser = ship_health.cruiser - 1 }
+  | Submarine -> { ship_health with submarine = ship_health.submarine - 1 }
+  | Destroyer -> { ship_health with destroyer = ship_health.destroyer - 1 }
+
+let ship_has_sunk ship_type ship_health =
+  match ship_type with
+  | Carrier -> ship_health.carrier = 0
+  | Battleship -> ship_health.battleship = 0
+  | Cruiser -> ship_health.cruiser = 0
+  | Submarine -> ship_health.submarine = 0
+  | Destroyer -> ship_health.destroyer = 0
+
+let update_board_after_attack board coordinates attacked_outcome =
   let row = fst coordinates in
   let col = snd coordinates in
-  let opponent_ship_board =
-    List.mapi
-      (fun i r ->
-        if i <> row then r
-        else
-          List.mapi
-            (fun k elem ->
-              if k <> col then elem
-              else
-                match elem.occupation with
-                | Occupied _ -> { elem with attacked = Hit }
-                | Unoccupied -> { elem with attacked = Miss })
-            r)
-      opponent_ship_board
-  in
-  let block = get_value_at opponent_ship_board row col in
+  List.mapi
+    (fun i r ->
+      if i <> row then r
+      else
+        List.mapi
+          (fun k elem ->
+            if k <> col then elem else { elem with attacked = attacked_outcome })
+          r)
+    board
+
+let update_board_after_sunk board ship_type =
+  List.map
+    (fun row ->
+      List.map
+        (fun elem ->
+          match elem.occupation with
+          | Occupied ship ->
+              if ship = ship_type then { elem with attacked = Sunk } else elem
+          | Unoccupied -> elem)
+        row)
+    board
+
+let game_over ship_health =
+  ship_health.carrier = 0 && ship_health.battleship = 0
+  && ship_health.cruiser = 0 && ship_health.destroyer = 0
+  && ship_health.submarine = 0
+
+let attack my_attacked_board opponent_ship_board opponent_ship_health
+    coordinates =
+  let block = get_value_at opponent_ship_board coordinates in
   match block.occupation with
   | Unoccupied ->
       let my_attacked_board =
-        List.mapi
-          (fun i r ->
-            if i <> row then r
-            else List.mapi (fun k elem -> if k <> col then elem else Miss) r)
-          my_attacked_board
+        update_board_after_attack my_attacked_board coordinates Miss
       in
-      (my_attacked_board, opponent_ship_board, false)
-  | Occupied _ ->
-      let my_attacked_board =
-        List.mapi
-          (fun i r ->
-            if i <> row then r
-            else List.mapi (fun k elem -> if k <> col then elem else Hit) r)
-          my_attacked_board
+      let opponent_ship_board =
+        update_board_after_attack opponent_ship_board coordinates Miss
       in
-      (my_attacked_board, opponent_ship_board, true)
+      (my_attacked_board, opponent_ship_board, opponent_ship_health, Miss)
+  | Occupied ship_type ->
+      let new_opponent_ship_health =
+        lower_ship_health opponent_ship_health ship_type
+      in
+      let ship_just_sunk = ship_has_sunk ship_type new_opponent_ship_health in
+      if not ship_just_sunk then
+        let my_attacked_board =
+          update_board_after_attack my_attacked_board coordinates Hit
+        in
+        let opponent_ship_board =
+          update_board_after_attack opponent_ship_board coordinates Hit
+        in
+        (my_attacked_board, opponent_ship_board, new_opponent_ship_health, Hit)
+      else
+        let my_attacked_board =
+          update_board_after_sunk my_attacked_board ship_type
+        in
+        let opponent_ship_board =
+          update_board_after_sunk opponent_ship_board ship_type
+        in
+        (my_attacked_board, opponent_ship_board, new_opponent_ship_health, Sunk)
 
 (*-----------------------------HELPERS--------------------------*)
 

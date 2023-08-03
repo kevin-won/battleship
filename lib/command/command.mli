@@ -41,7 +41,7 @@ type orientation_and_location_command = orientation * position
     ship board. *)
 
 val valid_orientation_and_location_command :
-  string -> ship_type -> ship_board -> ship
+  string -> ship_type -> board -> ship
 (** [valid_orientation_and_location_command] returns the new ship to be added to
     [ship_board] according to the details specified in [command] and
     [ship_type], if [command] is a valid command for the orientation and start
@@ -68,7 +68,7 @@ val valid_orientation_and_location_command :
 
 (** -------------------------ATTACK-------------------------*)
 
-val valid_attack_command : string -> position
+val valid_attack_command : string -> board -> position
 (** [valid_attack_command] returns the coordinates expressed in
     [coordinates_command] if [coordinates_command] is valid, and raises an
     exception if invalid. Exact details are specified in
